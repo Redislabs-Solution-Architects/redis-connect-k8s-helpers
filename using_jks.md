@@ -71,7 +71,7 @@ Look through the file for the `### TRUSTSTORE` braces.
           readOnly: true
    ### end TRUSTSTORE change
    ```
-* Map the secret to the above mount point so that the truststore.jks file is 
+* Map the secret to the above mount point so that the truststore.jks file is available to the Redis Connect jvm.
    ```
    ### TRUSTSTORE
       - name: truststore-volume
@@ -82,7 +82,13 @@ Look through the file for the `### TRUSTSTORE` braces.
             path: "truststore.jks" # it will appear in the FS as /truststore/truststore.jks     
    ### end TRUSTSTORE change         
    ```
-* 
+* Add the JVM options to leverage the trusstore file from the filesystem and password from the environment variables.
+   ```
+   ### end TRUSTSTORE change### TRUSTSTORE change
+          - name: REDISCONNECT_JAVA_OPTIONS
+            value: "-XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx1g -Djavax.net.ssl.trustStore=/truststore/truststore.jks -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)"
+### end TRUSTSTORE change
+   ```
 
 ### Resources
 

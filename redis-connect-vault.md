@@ -90,6 +90,7 @@ All revocation operations queued successfully!
 
 
 # References
+Thanks @Anton Umnikov for starting this [here](https://github.com/antonum/redis-connect-dist/blob/main/docs/vault.md).
 
 https://www.hashicorp.com/blog/kubernetes-vault-integration-via-sidecar-agent-injector-vs-csi-provider
 https://learn.hashicorp.com/tutorials/vault/kubernetes-openshift?in=vault/kubernetes
