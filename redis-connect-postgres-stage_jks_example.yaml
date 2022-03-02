@@ -1,0 +1,101 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-connect-postgres-stage # deployment name
+  labels:
+    app: redis-connect-postgres-stage # deployment label
+spec:
+  backoffLimit: 3 # try this many times before declaring failure
+  template: # pod template
+    metadata:
+      labels:
+        app: redis-connect-postgres-stage 
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name:  redis-connect-postgres # Container name 
+        image: redislabs/redis-connect-postgres:latest #repo/image:tag
+# #### uncomment the following two lines for troubleshooting 
+#         command: [ "/bin/bash", "-c", "--" ]
+#         args: [ "while true; do sleep 30; done;" ]
+# ####
+        command: [ "/opt/redislabs/redis-connect-postgres/bin/redisconnect.sh", "stage"] 
+        imagePullPolicy: Always # IfNotPresent # Always pull image
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "256Mi"
+          requests:
+            cpu: "1000m"
+            memory: "256Mi"
+        ports:  
+        - containerPort: 8282 # exposed container port to the REST API 
+          protocol: TCP
+        env:
+          - name: REDISCONNECT_LOGBACK_CONFIG
+            value: "/opt/redislabs/redis-connect-postgres/config/logs/logback.xml"
+          - name: REDISCONNECT_CONFIG
+            value: "/opt/redislabs/redis-connect-postgres/config/fromconfigmap"
+          - name: REDISCONNECT_REST_API_ENABLED
+            value: "false"
+          - name: REDISCONNECT_REST_API_PORT
+            value: "8282"
+### TRUSTSTORE change
+          - name: TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef: 
+                name: truststorezzz
+                key: "password.txt" # might need to escape the `.`          
+### end TRUSTSTORE change### TRUSTSTORE change
+          - name: REDISCONNECT_JAVA_OPTIONS
+            value: "-XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx1g -Djavax.net.ssl.trustStore=/truststore/truststore.jks -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)"
+### end TRUSTSTORE change
+          - name: REDISCONNECT_TARGET_PASSWORD
+            value: test
+          - name: REDISCONNECT_TARGET_USERNAME
+            value: test
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/redislabs/redis-connect-postgres/config/fromconfigmap  # must match env:REDISCONNECT_CONFIG
+### TRUSTSTORE change
+        - name: truststore-volume
+          mountPath: "/truststore"
+          readOnly: true
+### end TRUSTSTORE change
+      volumes:
+      - name: config-volume
+        configMap:
+          name: redis-connect-postgres-config
+          items:
+          - key: JobConfig.yml
+            path: JobConfig.yml
+          - key: JobManager.yml
+            path: JobManager.yml
+          - key: Setup.yml
+            path: Setup.yml
+          - key: env.yml
+            path: env.yml
+          - key: mapper1.yml
+            path: mappers/mapper1.yml
+### TRUSTSTORE
+      - name: truststore-volume
+        secret:
+          secretName: truststorezzz
+          items:
+          - key: "truststore.jks"
+            path: "truststore.jks" # it will appear in the FS as /truststore/truststore.jks     
+### end TRUSTSTORE change         
+# ---
+# RedisConnect service with name 'redis-connect-service'
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: redis-connect-service       # name should not be 'redis-connect' 
+# spec:
+#   type: ClusterIP
+#   ports:
+#     - port: 80
+#       targetPort: 8282
+#   selector:
+#     app: redis-connect
+# ---
