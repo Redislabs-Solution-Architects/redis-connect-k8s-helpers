@@ -87,8 +87,10 @@ Look through the file for the `### TRUSTSTORE` braces.
    ### end TRUSTSTORE change### TRUSTSTORE change
           - name: REDISCONNECT_JAVA_OPTIONS
             value: "-XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx1g -Djavax.net.ssl.trustStore=/truststore/truststore.jks -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)"
-### end TRUSTSTORE change
+   ### end TRUSTSTORE change
    ```
+4. Proceed with your normal stage and start deployments for Redis Connect
+
 
 ### Resources
 
