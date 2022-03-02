@@ -1,8 +1,11 @@
 # Let's go!
 
-## Pre-reqs
+## Quick install Vault in dev mode
 
-- You will need to have Vault running or the Vault operator with a Vault running. Resources at the end of the doc can help with that.
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
+helm install vault hashicorp/vault \
+    --set "server.dev.enabled=true"
 
 ## 
 1. Create a k8s service account in your context K8s environment
