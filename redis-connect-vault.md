@@ -19,7 +19,10 @@ kubectl create sa redis-connect
 ```
 vault secrets enable database
 ```
-
+2b. Enable the kubernetes engine in Vault
+```
+vault secrets enable kubernetes
+```
 3. Configure K8s auth method in Vault
 ```
 vault write auth/kubernetes/config \
