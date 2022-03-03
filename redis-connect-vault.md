@@ -15,14 +15,12 @@ helm install vault hashicorp/vault \
 kubectl create sa redis-connect
 ```
 
-2. Enable the database secrets engine in Vault
+2. Enable the database secrets engine and kubernetes engine in Vault
 ```
 vault secrets enable database
-```
-2b. Enable the kubernetes engine in Vault
-```
 vault secrets enable kubernetes
 ```
+
 3. Configure K8s auth method in Vault
 ```
 vault write auth/kubernetes/config \
@@ -88,7 +86,7 @@ vault lease revoke database/creds/redis-connect/nTZrwR9YeJd8aMTrijPHc6aR
 All revocation operations queued successfully!
 ```
 
-9. Annotate your pod with the following for those credentials to appear in your pod.
+9. Annotate your pod with the following for those credentials to appear in your pod. Presenting the secret to the pod is critical as it is what will allow the this deployment access to the secret in Vault.
 
     ```
     spec:
@@ -109,6 +107,8 @@ All revocation operations queued successfully!
             sourceUsername={{ .Data.username }}
             sourcePassword={{ .Data.password }}
             {{- end }}
+        spec:
+          serviceAccountName: redis-connect        ## critical!
     ```
 10. Validate that those files exist in your pod filesystem.
 ```
@@ -127,8 +127,8 @@ source.password=A1a-nKCHbeXqKJxa0LO8
 # References
 Thanks @Anton Umnikov for starting this [here](https://github.com/antonum/redis-connect-dist/blob/main/docs/vault.md).
 
-https://www.hashicorp.com/blog/kubernetes-vault-integration-via-sidecar-agent-injector-vs-csi-provider
-https://learn.hashicorp.com/tutorials/vault/kubernetes-openshift?in=vault/kubernetes
-https://www.atlantbh.com/keeping-secrets-secure-with-vault-inside-a-kubernetes-cluster/
-https://devopscube.com/vault-agent-injector-tutorial/
+* https://www.hashicorp.com/blog/kubernetes-vault-integration-via-sidecar-agent-injector-vs-csi-provider
+* https://learn.hashicorp.com/tutorials/vault/kubernetes-openshift?in=vault/kubernetes
+* https://www.atlantbh.com/keeping-secrets-secure-with-vault-inside-a-kubernetes-cluster/
+* https://devopscube.com/vault-agent-injector-tutorial/
 
